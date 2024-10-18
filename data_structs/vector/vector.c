@@ -4,13 +4,13 @@
 vector* make_vector(size_t initial_size) {
     vector* v = (vector*)malloc(sizeof(vector));
     if (v == NULL) {
-        fprintf(stderr, "Memory allocation failed for vector structure\\n");
+        fprintf(stderr, "Memory allocation failed for vector structure\n");
         return NULL;
     }
     
     v->arr = (long long*)malloc(sizeof(long long) * initial_size);
     if (v->arr == NULL) {
-        fprintf(stderr, "Memory allocation failed for vector array\\n");
+        fprintf(stderr, "Memory allocation failed for vector array\n");
         free(v);
         return NULL;
     }
@@ -34,7 +34,7 @@ bool push_back(vector* v, long long val) {
         v->size <<= 1; 
         long long* temp = (long long*)realloc(v->arr, sizeof(long long) * v->size);
         if (temp == NULL) {
-            fprintf(stderr, "Memory reallocation failed\\n");
+            fprintf(stderr, "Memory reallocation failed\n");
             return false;
         }
         v->arr = temp;

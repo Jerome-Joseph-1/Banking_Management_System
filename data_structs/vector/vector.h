@@ -11,6 +11,7 @@ typedef struct _vector {
 } vector;
 
 vector* make_vector(size_t initial_size); 
+
 void free_vector(vector* v); 
 
 bool push_back(vector* v, long long val); 
