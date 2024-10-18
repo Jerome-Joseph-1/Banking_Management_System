@@ -21,8 +21,8 @@ typedef struct _psvector {
     long long cur;
 } ps_vector;
 
-bool push_back_psvector(p_vector* v, pair val);
-p_vector* make_ps_vector();
+bool push_back_psvector(ps_vector* v, pair_str val);
+ps_vector* make_ps_vector();
 
 // custom map 
 
@@ -33,24 +33,24 @@ typedef struct _map_i {
 } map_i;
 
 typedef struct _map_s {
-    p_vector** arr;
+    ps_vector** arr;
     long long size;
     long long cur;
 } map_s;
 
-// long long hash_s(char* key);
+long long hash_s(char* key);
 long long hash_i(long long key);
 
-// bool insert_s(map_s* m, char* key, long long val);
+bool insert_s(map_s* m, char* key, long long val);
 bool insert_i(map_i* m, long long key, long long val);
 
-// long long find_s(map_s* m, char* key, bool* found); 
+long long find_s(map_s* m, char* key, bool* found); 
 long long find_i(map_i* m, long long key, bool* found); 
 
 // size_t map_size_s(map_s*); 
-size_t map_size_i(map_i*); 
+// size_t map_size_i(map_i*); 
 
-// map_s* make_map_s(); 
+map_s* make_map_s(); 
 map_i* make_map_i(); 
 
 // void free_map_s(map_s*);

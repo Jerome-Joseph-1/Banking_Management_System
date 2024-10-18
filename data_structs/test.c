@@ -2,22 +2,27 @@
 #include <stdio.h>
 
 int main() {
-    map_i* m = make_map_i();
+    map_s* m = make_map_s();
 
-    insert_i(m, 5, 10);
-    insert_i(m, 5, 20);
-    insert_i(m, 15, 20);
-    insert_i(m, 25, 541651);
-    insert_i(m, 5, 321);
-    insert_i(m, 12, 7848);
-    insert_i(m, 15, 78485);
-    
+    insert_s(m, "apple", 10);
+    insert_s(m, "ban", 20);
+    insert_s(m, "ooooaaa", 20);
+    insert_s(m, "pppwwww", 541651);
+    insert_s(m, "ban", 321);
+    insert_s(m, "Ban", 7848);
+    insert_s(m, "apple", 78485);
 
-    long long arr[] = {15, 5, 25, 12, 15};
+    char arr[][8] = {
+        "apple",
+        "ban",
+        "ooooaaa",
+        "pppwwww",
+        "Ban"
+    };
     
     bool x = false;
     for (int i = 0; i < 5; ++i) {
-        printf("%lld : %lld\n", arr[i], find_i(m, arr[i], &x));
+        printf("%s : %lld\n", arr[i], find_s(m, arr[i], &x));
     }
     return 0;
 }

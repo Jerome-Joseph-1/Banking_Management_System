@@ -27,3 +27,11 @@ pair_str* make_pair_str(char* first, long long second) {
 
     return p;
 }
+
+void free_pair_i(pair* p) {
+    free(p);
+}
+
+void free_pair_s(pair_str* p) {
+    free(p);
+}

@@ -18,4 +18,6 @@ pair* make_pair(long long first, long long second);
 
 pair_str* make_pair_str(char* first, long long second);
 
+void free_pair_i(pair* p);
+void free_pair_s(pair_str* p);
 #endif
