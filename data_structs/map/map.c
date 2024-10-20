@@ -8,13 +8,14 @@ long long MAP_SIZE_MAX = 10000;
 long long hash_s(char* key) {
     long long hash = 5381; 
     int c;
-    
+
     while ((c = *key++)) {
         hash = ((hash << 5) + hash) + c;  
     }
-    
-    return hash % MAP_SIZE_MAX;  
+
+    return (hash % MAP_SIZE_MAX + MAP_SIZE_MAX) % MAP_SIZE_MAX;
 }
+
 
 long long hash_i(long long key) {
     
@@ -250,6 +251,16 @@ long long find_s(map_s* m, char* key, bool* found) {
     *found = false;
     return 0;    
 }
+
+// void print_i(map_i* m) {
+//     for (long long hashed_key = 0; hashed_key < 4; ++hashed_key) {
+//         p_vector* arr = m->arr[hashed_key];
+//         printf("Size: %lld\n", arr->size);
+//         for (size_t i = 0; i < 4; ++i) {
+//             printf("<%lld, %lld>\n", arr->arr[i].first, arr->arr[i].second);
+//         }
+//     }
+// }
 
 size_t map_size_s(map_s* m) {
     return 0;

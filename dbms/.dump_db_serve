@@ -1,0 +1,177 @@
+
+
+
+// void handle_client_query(int client_socket) {
+//     char buffer[1024] = {0};
+    
+//     // Read query type from the client (e.g., "INSERT", "FETCH", "UPDATE")
+//     int valread = read(client_socket, buffer, 1024);
+//     if (valread < 0) {
+//         perror("Failed to read from socket");
+//         close(client_socket);
+//         return;
+//     }
+
+//     // printf("Query: |%s| %d\n", buffer, strcmp(buffer, "INSERT"));
+//     // Process the query based on the command sent
+//     if (strcmp(buffer, "INSERT") == 0) {
+//         client cli;
+//         read(client_socket, &cli, sizeof(client));  // Read client data
+//         insert_to_db(CLIENT, &cli, sizeof(client));  // Insert into DB
+//         send(client_socket, "INSERT OK", strlen("INSERT OK"), 0);  // Send confirmation
+//     } else if (strcmp(buffer, "FETCH") == 0) {
+//         long long client_id;
+//         read(client_socket, &client_id, sizeof(client_id));  // Read client ID
+//         client* fetched_client = (client*)fetch_from_db(CLIENT, client_id, sizeof(client));  // Fetch from DB
+//         if (fetched_client != NULL) {
+//             send(client_socket, fetched_client, sizeof(client), 0);  // Send fetched data back
+//             free(fetched_client);
+//         } else {
+//             send(client_socket, "NOT FOUND", strlen("NOT FOUND"), 0);  // Send not found response
+//         }
+
+//     } else if (strcmp(buffer, "UPDATE") == 0) {
+//         enum DB db_type;
+//         long long id;
+
+//         read(client_socket, &db_type, sizeof(enum DB));  // Read the DB type (CLIENT, EMPLOYEE, etc.)
+//         read(client_socket, &id, sizeof(long long));     // Read the ID of the record to update
+
+//         client cli_update;  // Assuming you're updating a client for this example
+//         read(client_socket, &cli_update, sizeof(client));  // Read updated client data
+
+//         update_in_db_partial(db_type, id, &cli_update, sizeof(client));  // Update the record
+
+//         send(client_socket, "UPDATE OK", strlen("UPDATE OK"), 0);  // Send confirmation
+//     } else {
+//         send(client_socket, "INVALID QUERY", strlen("INVALID QUERY"), 0);  // Send error if unknown command
+//     }
+
+//     // close(client_socket);  // Close the connection after handling
+// }
+
+
+// void dbms_server() {
+//     int server_fd, client_socket;
+//     struct sockaddr_in address;
+//     int opt = 1;
+//     int addrlen = sizeof(address);
+
+//     // Create socket file descriptor
+//     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
+//         perror("Socket failed");
+//         exit(EXIT_FAILURE);
+//     }
+
+//     // Attach socket to port 8080
+//     if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt))) {
+//         perror("setsockopt failed");
+//         exit(EXIT_FAILURE);
+//     }
+
+//     address.sin_family = AF_INET;
+//     address.sin_addr.s_addr = INADDR_ANY;
+//     address.sin_port = htons(PORT);
+
+//     // Bind the socket to the port
+//     if (bind(server_fd, (struct sockaddr*)&address, sizeof(address)) < 0) {
+//         perror("Bind failed");
+//         exit(EXIT_FAILURE);
+//     }
+
+//     // Start listening for incoming connections
+//     if (listen(server_fd, 3) < 0) {
+//         perror("Listen failed");
+//         exit(EXIT_FAILURE);
+//     }
+
+//     printf("DBMS Server listening on port %d...\n", PORT);
+
+//     while (1) {
+//         if ((client_socket = accept(server_fd, (struct sockaddr*)&address, (socklen_t*)&addrlen)) < 0) {
+//             perror("Accept failed");
+//             exit(EXIT_FAILURE);
+//         }
+
+//         handle_client_query(client_socket);
+//     }
+// }
+
+
+// void test_insert_and_fetch() {
+//     // Initialize the database
+
+//     // // Create a few employee records
+//     // employee emp1 = {1, "John Doe"};
+//     // employee emp2 = {2, "Jane Smith"};
+//     // employee emp3 = {3, "Alice Brown"};
+
+//     // // Create a few client records
+//     // client client1 = {1, "Client One", "12345678901234", "987654321012"};
+//     // client client2 = {2, "Client Two", "98765432109876", "123456789012"};
+//     // client client3 = {3, "Client Three", "12345098765432", "012345678901"};
+
+//     // // Insert employees
+//     // printf("Inserting employees...\n");
+//     // insert_to_db(EMPLOYEE, &emp1, sizeof(employee));
+//     // insert_to_db(EMPLOYEE, &emp2, sizeof(employee));
+//     // insert_to_db(EMPLOYEE, &emp3, sizeof(employee));
+
+//     // // Insert clients
+//     // printf("Inserting clients...\n");
+//     // insert_to_db(CLIENT, &client1, sizeof(client));
+//     // insert_to_db(CLIENT, &client2, sizeof(client));
+//     // insert_to_db(CLIENT, &client3, sizeof(client));
+
+//     // Fetch and display employee records
+//     printf("\nFetching employees...\n");
+//     fetch_from_db(EMPLOYEE, 1, sizeof(employee));
+//     fetch_from_db(EMPLOYEE, 2, sizeof(employee));
+//     fetch_from_db(EMPLOYEE, 3, sizeof(employee));
+
+//     // Fetch and display client records
+//     printf("\nFetching clients...\n");
+//     fetch_from_db(CLIENT, 1, sizeof(client));
+//     fetch_from_db(CLIENT, 2, sizeof(client));
+//     fetch_from_db(CLIENT, 3, sizeof(client));
+// }
+
+// void test_partial_update() {
+//     // Step 1: Insert a client record
+//     client cli1 = { .id = 201, .name = "Alice Wonderland", .account_number = "123456789", .aadhaar = "123456789012" };
+//     insert_to_db(CLIENT, &cli1, sizeof(client));
+//     printf("Inserted Client: ID = %lld, Name = %s, Account Number = %s, Aadhaar = %s\n",
+//            cli1.id, cli1.name, cli1.account_number, cli1.aadhaar);
+
+//     // client* fetched_cli = (client*)fetch_from_db(CLIENT, 201, sizeof(client));
+
+//     // // Step 3: Print the details fetched from the database
+//     // if (fetched_cli != NULL) {
+//     //     printf("Fetched Client: ID = %lld, Name = %s, Account Number = %s, Aadhaar = %s\n",
+//     //            fetched_cli->id, fetched_cli->name, fetched_cli->account_number, fetched_cli->aadhaar);
+//     //     free(fetched_cli);  // Free the memory allocated by fetch_from_db
+//     // } else {
+//     //     printf("Client not found in the database.\n");
+//     // }
+
+//     // Step 2: Fetch and print the inserted client
+//     client* fetched_cli1 = (client*)fetch_from_db(CLIENT, 201, sizeof(client));
+//     if (fetched_cli1) {
+//         printf("Fetched Client: ID = %lld, Name = %s, Account Number = %s, Aadhaar = %s\n",
+//                fetched_cli1->id, fetched_cli1->name, fetched_cli1->account_number, fetched_cli1->aadhaar);
+//         free(fetched_cli1);  // Free memory after fetching
+//     }
+
+//     // Step 3: Partially update the client's name only
+//     client cli1_update = { .id = 201 };
+//     strncpy(cli1_update.name, "Alice Updated", sizeof(cli1_update.name));
+//     update_in_db_partial(CLIENT, 201, &cli1_update, sizeof(client));
+
+//     // Step 4: Fetch and print the updated client
+//     client* fetched_cli1_updated = (client*)fetch_from_db(CLIENT, 201, sizeof(client));
+//     if (fetched_cli1_updated) {
+//         printf("Fetched Updated Client: ID = %lld, Name = %s, Account Number = %s, Aadhaar = %s\n",
+//                fetched_cli1_updated->id, fetched_cli1_updated->name, fetched_cli1_updated->account_number, fetched_cli1_updated->aadhaar);
+//         free(fetched_cli1_updated);  // Free memory after fetching
+//     }
+// }
