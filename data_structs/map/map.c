@@ -103,7 +103,7 @@ map_i* make_map_i() {
         return NULL;
     }
 
-    m->size = MAP_SIZE_MAX;
+    m->map_size = 0;
 
     m->arr = (p_vector**)malloc(sizeof(p_vector*) * MAP_SIZE_MAX);
 
@@ -133,7 +133,7 @@ map_s* make_map_s() {
         return NULL;
     }
 
-    m->size = MAP_SIZE_MAX;
+    m->map_size = 0;
 
     m->arr = (ps_vector**)malloc(sizeof(ps_vector*) * MAP_SIZE_MAX);
 
@@ -168,6 +168,7 @@ bool insert_s(map_s* m, char* key, long long val) {
 
     for (long long i = 0; i < arr->size; ++i) {
         if(strcmp(arr->arr[i].first, key) == 0) {
+            m->map_size++;
             arr->arr[i].second = val;
             return true;
         }
@@ -180,6 +181,7 @@ bool insert_s(map_s* m, char* key, long long val) {
         return false;
     }
 
+    m->map_size++;
     return true;
 }
 
@@ -197,6 +199,7 @@ bool insert_i(map_i* m, long long key, long long val) {
     for (long long i = 0; i < arr->size; ++i) {
         if(arr->arr[i].first == key) {
             arr->arr[i].second = val;
+            m->map_size++;
             return true;
         }
     }
@@ -207,6 +210,7 @@ bool insert_i(map_i* m, long long key, long long val) {
         fprintf(stderr, "Failed to push value in insert_i\n");
         return false;
     }
+    m->map_size++;
 
     return true;
 }
@@ -246,3 +250,8 @@ long long find_s(map_s* m, char* key, bool* found) {
     *found = false;
     return 0;    
 }
+
+size_t map_size_s(map_s* m) {
+    return 0;
+} 
+size_t map_size_i(map_i*); 

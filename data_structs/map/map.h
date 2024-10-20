@@ -28,14 +28,12 @@ ps_vector* make_ps_vector();
 
 typedef struct _map_i {
     p_vector** arr;
-    long long size;
-    long long cur;
+    long long map_size;
 } map_i;
 
 typedef struct _map_s {
     ps_vector** arr;
-    long long size;
-    long long cur;
+    long long map_size;
 } map_s;
 
 long long hash_s(char* key);
@@ -47,13 +45,13 @@ bool insert_i(map_i* m, long long key, long long val);
 long long find_s(map_s* m, char* key, bool* found); 
 long long find_i(map_i* m, long long key, bool* found); 
 
-// size_t map_size_s(map_s*); 
-// size_t map_size_i(map_i*); 
+size_t map_size_s(map_s*); 
+size_t map_size_i(map_i*); 
 
 map_s* make_map_s(); 
 map_i* make_map_i(); 
 
-// void free_map_s(map_s*);
+void free_map_s(map_s*);
 void free_map_i(map_i*);
 
 #endif
