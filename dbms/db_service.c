@@ -10,6 +10,10 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdlib.h>
+
+#define PORT 8080
+#define BUFFER_SIZE 1024
 
 map_vector* indexes;  // Updated to use the new map_vector structure
 vector* db_fds;  // Vector to store file descriptors for each DB
@@ -90,7 +94,6 @@ void insert_to_db(enum DB db, void* data_struct, size_t size) {
     // Store the record in the DB file
     store_bytes_to_file(fd, start_position, data_struct, size);
 }
-
 
 void* fetch_from_db(enum DB db, long long id, size_t size) {
     int fd = get_fd_of_db(db);
@@ -182,56 +185,121 @@ void update_in_db_partial(enum DB db, long long id, void* partial_data, size_t s
     free(existing_record);
 }
 
-void run_tests() {
-    client new_client = {65481,"John Doe", "123456789", "987654321"};
-    employee new_employee = {987, "Jane Smith"};
+// Function to handle incoming requests
+void handle_client_request(int new_socket) {
+    char buffer[BUFFER_SIZE] = {0};
+    int valread = read(new_socket, buffer, BUFFER_SIZE);
 
-    // Step 3: Insert data into the CLIENT table
-    insert_to_db(CLIENT, &new_client, sizeof(client));
+    // Parse the request (you can define a more structured protocol if needed)
+    char command[BUFFER_SIZE];
+    sscanf(buffer, "%s", command);
 
-    // Step 4: Fetch the inserted client record
-    client* fetched_client = (client*)fetch_from_db(CLIENT, 65481, sizeof(client)); // Assuming ID is 1 for simplicity
-    if (fetched_client) {
-        printf("Fetched Client: Name: %s, Account: %s, Aadhaar: %s\n", 
-                fetched_client->name, 
-                fetched_client->account_number, 
-                fetched_client->aadhaar);
-        free(fetched_client); // Free the fetched data
+    if (strcmp(command, "INSERT") == 0) {
+        // Example: INSERT CLIENT {client data in binary or JSON format}
+        // Parse data and call insert_to_db
+        client new_client;
+        long long id;
+        sscanf(buffer + strlen("INSERT CLIENT "), "%lld %s %s %s", &new_client.id, new_client.name, new_client.account_number, new_client.aadhaar);
+
+        insert_to_db(CLIENT, &new_client, sizeof(client));
+
+        char* response = "Insert successful";
+        send(new_socket, response, strlen(response), 0);
+
+    } else if (strcmp(command, "FETCH") == 0) {
+        // Example: FETCH CLIENT {id}
+        // Parse the request to fetch data
+        long long id;
+        sscanf(buffer + strlen("FETCH CLIENT "), "%lld", &id);
+
+        client* fetched_client = (client*)fetch_from_db(CLIENT, id, sizeof(client));
+        if (fetched_client) {
+            // You can send the fetched client data back as JSON, or any format you prefer
+            char response[BUFFER_SIZE];
+            snprintf(response, BUFFER_SIZE, "Fetched Client: Name: %s, Account: %s, Aadhaar: %s\n", fetched_client->name, fetched_client->account_number, fetched_client->aadhaar);
+            send(new_socket, response, strlen(response), 0);
+            free(fetched_client);
+        } else {
+            char* response = "Client not found";
+            send(new_socket, response, strlen(response), 0);
+        }
+
+    } else if (strcmp(command, "UPDATE") == 0) {
+        // Example: UPDATE CLIENT {client id} {new client data}
+        // Parse data and call update_in_db_partial
+        client update_client;
+        long long id;
+        sscanf(buffer + strlen("UPDATE CLIENT "), "%lld %s", &id, update_client.name);  // For example, update only the name
+
+        update_in_db_partial(CLIENT, id, &update_client, sizeof(client));
+
+        char* response = "Update successful";
+        send(new_socket, response, strlen(response), 0);
+
     } else {
-        printf("Failed to fetch client.\n");
+        char* response = "Invalid command";
+        send(new_socket, response, strlen(response), 0);
+    }
+}
+
+// Start the server
+void start_server() {
+    int server_fd, new_socket;
+    struct sockaddr_in address;
+    int opt = 1;
+    int addrlen = sizeof(address);
+
+    // Creating socket file descriptor
+    if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
+        perror("Socket creation failed");
+        exit(EXIT_FAILURE);
     }
 
-    // Step 5: Insert data into the EMPLOYEE table
-    insert_to_db(EMPLOYEE, &new_employee, sizeof(employee));
-
-    // Step 6: Fetch the inserted employee record
-    employee* fetched_employee = (employee*)fetch_from_db(EMPLOYEE, 987, sizeof(employee)); // Assuming ID is 1 for simplicity
-    if (fetched_employee) {
-        printf("Fetched Employee: Name: %s\n", fetched_employee->name);
-        free(fetched_employee); // Free the fetched data
-    } else {
-        printf("Failed to fetch employee.\n");
+    // Forcefully attaching socket to the port
+    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt))) {
+        perror("setsockopt failed");
+        exit(EXIT_FAILURE);
     }
 
-    // Step 7: Update the client partially
-    client update_client = {65481, "John Smith", "", ""}; // Only updating the name
-    update_in_db_partial(CLIENT, 65481, &update_client, sizeof(client));
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_port = htons(PORT);
 
-    // Step 8: Fetch the updated client record
-    fetched_client = (client*)fetch_from_db(CLIENT, 65481, sizeof(client)); // Assuming ID is 1 for simplicity
-    if (fetched_client) {
-        printf("Fetched Updated Client: Name: %s, Account: %s, Aadhaar: %s\n", 
-                fetched_client->name, 
-                fetched_client->account_number, 
-                fetched_client->aadhaar);
-        free(fetched_client); // Free the fetched data
-    } else {
-        printf("Failed to fetch updated client.\n");
+    // Bind the socket to the network address and port
+    if (bind(server_fd, (struct sockaddr*)&address, sizeof(address)) < 0) {
+        perror("Binding failed");
+        exit(EXIT_FAILURE);
+    }
+
+    // Start listening for connections
+    if (listen(server_fd, 3) < 0) {
+        perror("Listening failed");
+        exit(EXIT_FAILURE);
+    }
+    printf("Server started and listening on port %d...\n", PORT);
+
+    // Main loop: accept connections and handle requests
+    while (1) {
+        if ((new_socket = accept(server_fd, (struct sockaddr*)&address, (socklen_t*)&addrlen)) < 0) {
+            perror("Accept failed");
+            exit(EXIT_FAILURE);
+        }
+        printf("Connection accepted\n");
+
+        // Handle the client's request
+        handle_client_request(new_socket);
+
+        // Close the socket after handling the request
+        close(new_socket);
     }
 }
 
 int main() {
+    // Initialize the database and load indexes
     initialize_db();
 
-    run_tests();
+    // Start the socket server
+    start_server();
+
+    return 0;
 }
