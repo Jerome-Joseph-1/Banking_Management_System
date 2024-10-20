@@ -38,4 +38,8 @@ long long extract_id_from_record(enum DB db, void* record);
 
 size_t get_record_size(enum DB db);
 
+char* extract_aadhaar_from_record(enum DB db, void* record);
+
+char* extract_account_number_from_record(enum DB db, void* record);
+
 #endif

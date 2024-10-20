@@ -54,4 +54,7 @@ map_i* make_map_i();
 void free_map_s(map_s*);
 void free_map_i(map_i*);
 
+// void print_i(map_i* m);
+// void print_s(map_s* m);
+
 #endif
